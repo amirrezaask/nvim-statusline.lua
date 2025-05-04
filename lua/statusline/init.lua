@@ -85,7 +85,7 @@ local default_sections = {
 ---@field right table<string>
 ---@field delimiter string
 
----@param opts statusline.Config
+---@param opts statusline.Config?
 M.setup = function(opts)
   opts = opts or default_sections
   local left = table.concat(opts.left or {}, opts.delimiter)
