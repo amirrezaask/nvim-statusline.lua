@@ -94,6 +94,5 @@ M.setup = function(opts)
 
   vim.o.statusline = table.concat({ left, center, right }, "%=")
 end
-M.setup()
 
 return M
