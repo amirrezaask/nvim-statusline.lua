@@ -1,6 +1,7 @@
 local M = {}
 M.sections = {}
 _G.statusline = {}
+
 _G.statusline.filetype_icon = function()
   local filetype = vim.bo.filetype or "Unknown"
   local icon
@@ -60,10 +61,10 @@ _G.statusline.git_head = function()
   end
 end
 
-M.sections.git_head = "%{v:lua.statusline_git_head()}"
-M.sections.git_status = "%{v:lua.statusline_git_status()}"
-M.sections.mode = "[%{v:lua._statusline_mode()}]"
-M.sections.filetype_icon = "%{v:lua._filetype_icon()}"
+M.sections.git_head = "%{v:lua.statusline.git_head()}"
+M.sections.git_status = "%{v:lua.statusline.git_status()}"
+M.sections.mode = "[%{v:lua.statusline.mode()}]"
+M.sections.filetype_icon = "%{v:lua.statusline.filetype_icon()}"
 M.sections.filetype = "%y"
 M.sections.filename = "%r%h%w%q%F"
 M.sections.line = "%l"
@@ -93,5 +94,6 @@ M.setup = function(opts)
 
   vim.o.statusline = table.concat({ left, center, right }, "%=")
 end
+M.setup()
 
 return M
