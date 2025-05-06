@@ -88,6 +88,9 @@ local default_sections = {
 ---@param opts statusline.Config?
 M.setup = function(opts)
   opts = opts or default_sections
+  if #opts == 0 then
+    opts = default_sections
+  end
   local left = table.concat(opts.left or {}, opts.delimiter)
   local center = table.concat(opts.center or {}, opts.delimiter)
   local right = table.concat(opts.right or {}, opts.delimiter)
