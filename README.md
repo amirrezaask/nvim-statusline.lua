@@ -1,4 +1,4 @@
-# nvim-statusline
+# Vitaline.nvim
 
 A simple statusline for neovim written in lua.
 
@@ -9,7 +9,7 @@ Lazy:
   "amirrezaask/nvim-statusline.lua",
   dependencies = {
     "nvim-tree/nvim-web-devicons", -- either of these two
-    "echasnovski/mini.nvim",
+    -- "echasnovski/mini.nvim",
   },
   opts = {}
 }

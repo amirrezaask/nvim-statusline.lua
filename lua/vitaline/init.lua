@@ -9,15 +9,15 @@ local options = {
 }
 
 vim.cmd [[
-  hi! link StatusLineNormal TabLineSel
-  hi! link StatusLineInsert Search
-  hi! link StatusLineVisual Character
-  hi! link StatusLineCommand FloatTitle
-  hi! link StatusLineReplace Error
-  hi! link StatusLineSelect StatusLineVisual
-  hi! link StatusLineTerminal StatusLineInsert
-  hi! link StatusLineGitBranch Conditional
-  hi! link StatusLineGitStatus Conditional
+  hi default link StatusLineNormal TabLineSel
+  hi default link StatusLineInsert Search
+  hi default link StatusLineVisual Character
+  hi default link StatusLineCommand FloatTitle
+  hi default link StatusLineReplace Error
+  hi default link StatusLineSelect StatusLineVisual
+  hi default link StatusLineTerminal StatusLineInsert
+  hi default link StatusLineGitBranch Conditional
+  hi default link StatusLineGitStatus Conditional
 ]]
 
 M.internal = {}
@@ -103,10 +103,10 @@ M.components.bracket = function(s)
   return "[" .. s .. "]"
 end
 
-M.components.git_head = "%{%v:lua.require('nvim-statusline').internal.git_head()%}"
-M.components.git_status = "%{%v:lua.require('nvim-statusline').internal.git_status()%}"
-M.components.mode = "%{%v:lua.require('nvim-statusline').internal.mode()%}"
-M.components.filetype_icon = "%{v:lua.require('nvim-statusline').internal.filetype_icon()}"
+M.components.git_head = "%{%v:lua.require('vitaline').internal.git_head()%}"
+M.components.git_status = "%{%v:lua.require('vitaline').internal.git_status()%}"
+M.components.mode = "%{%v:lua.require('vitaline').internal.mode()%}"
+M.components.filetype_icon = "%{v:lua.require('vitaline').internal.filetype_icon()}"
 M.components.filetype = "%y"
 M.components.filename = "%r%h%w%q%F"
 M.components.line = "%l"
