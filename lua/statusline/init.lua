@@ -20,11 +20,9 @@ vim.cmd [[
   hi! link StatusLineGitStatus Conditional
 ]]
 
-M.components = {}
+M.internal = {}
 
-_G.statusline = {}
-
-_G.statusline.filetype_icon = function()
+M.internal.filetype_icon = function()
   if not options.use_icons then
     return ""
   end
@@ -47,7 +45,7 @@ _G.statusline.filetype_icon = function()
   return icon or ""
 end
 
-function _G.statusline.mode()
+function M.internal.mode()
   local mode = vim.api.nvim_get_mode().mode
   local mode_map = {
     ["n"] = { name = "Normal", hl = "StatuslineNormal" },
@@ -75,15 +73,9 @@ function _G.statusline.mode()
   return "%#" .. mode_info.hl .. "#" .. " " .. mode_info.name .. " " .. "%#StatusLine#"
 end
 
-M.components.space = " "
-
-M.components.bracket = function(s)
-  return "[" .. s .. "]"
-end
-
 local branch_icon = ""
 
-_G.statusline.git_status = function()
+M.internal.git_status = function()
   if not vim.b.gitsigns_status or vim.b.gitsigns_status == "" then
     return ""
   else
@@ -91,7 +83,7 @@ _G.statusline.git_status = function()
   end
 end
 
-_G.statusline.git_head = function()
+M.internal.git_head = function()
   if not vim.b.gitsigns_head or vim.b.gitsigns_head == "" then
     return ""
   else
@@ -103,10 +95,18 @@ _G.statusline.git_head = function()
   end
 end
 
-M.components.git_head = "%{%v:lua.statusline.git_head()%}"
-M.components.git_status = "%{%v:lua.statusline.git_status()%}"
-M.components.mode = "%{%v:lua.statusline.mode()%}"
-M.components.filetype_icon = "%{v:lua.statusline.filetype_icon()}"
+M.components = {}
+
+M.components.space = " "
+
+M.components.bracket = function(s)
+  return "[" .. s .. "]"
+end
+
+M.components.git_head = "%{%v:lua.require('statusline').internal.git_head()%}"
+M.components.git_status = "%{%v:lua.require('statusline').internal.git_status()%}"
+M.components.mode = "%{%v:lua.require('statusline').internal.mode()%}"
+M.components.filetype_icon = "%{v:lua.require('statusline').internal.filetype_icon()}"
 M.components.filetype = "%y"
 M.components.filename = "%r%h%w%q%F"
 M.components.line = "%l"
@@ -114,7 +114,7 @@ M.components.column = "%c"
 M.components.modified = "%m"
 M.components.line_col = M.components.line .. " :" .. M.components.column
 
-local default_sections = {
+local default_setup = {
   left = { M.components.mode, M.components.git_head },
   center = { M.components.filetype_icon, M.components.filename, M.components.modified },
   right = { M.components.git_status, M.components.bracket(M.components.line_col) },
@@ -132,9 +132,9 @@ M.setup = function(opts)
   pcall(function()
     require("mini.icons").setup()
   end)
-  opts = opts or default_sections
+  opts = opts or default_setup
   if #opts == 0 then
-    opts = default_sections
+    opts = default_setup
   end
   opts.options = opts.options or {}
   for k, v in pairs(options) do
@@ -148,7 +148,5 @@ M.setup = function(opts)
 
   vim.o.statusline = table.concat({ left, center, right }, "%=")
 end
-
-M.setup()
 
 return M
