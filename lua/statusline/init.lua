@@ -1,81 +1,123 @@
 local M = {}
-M.sections = {}
+
+---@enum statusline.IconsProvider
+M.icons_providers = { Mini = "mini", NvimWebDevicons = "nvim-web-devicons" }
+
+local options = {
+  use_icons = true,
+  icons_provider = M.icons_providers.Mini,
+}
+
+vim.cmd [[
+  hi! link StatusLineNormal TabLineSel
+  hi! link StatusLineInsert Search
+  hi! link StatusLineVisual Character
+  hi! link StatusLineCommand FloatTitle
+  hi! link StatusLineReplace Error
+  hi! link StatusLineSelect StatusLineVisual
+  hi! link StatusLineTerminal StatusLineInsert
+  hi! link StatusLineGitBranch Conditional
+  hi! link StatusLineGitStatus Conditional
+]]
+
+M.components = {}
+
 _G.statusline = {}
 
 _G.statusline.filetype_icon = function()
+  if not options.use_icons then
+    return ""
+  end
   local filetype = vim.bo.filetype or "Unknown"
+
   local icon
-  pcall(function()
-    icon = require("nvim-web-devicons").get_icon(filetype)
-  end)
+
+  if options.icons_provider == M.icons_providers.NvimWebDevicons then
+    pcall(function()
+      icon = require("nvim-web-devicons").get_icon(filetype)
+    end)
+  end
+
+  if options.icons_provider == M.icons_providers.Mini then
+    pcall(function()
+      icon = require("mini.icons").get("filetype", filetype)
+    end)
+  end
+
   return icon or ""
 end
 
 function _G.statusline.mode()
   local mode = vim.api.nvim_get_mode().mode
   local mode_map = {
-    ["n"] = "Normal",
-    ["i"] = "Insert",
-    ["v"] = "Visual",
-    ["V"] = "Visual Line",
-    ["\22"] = "Visual Block", -- \22 is Ctrl-V
-    ["c"] = "Command",
-    ["R"] = "Replace",
-    ["s"] = "Select",
-    ["S"] = "Select Line",
-    ["\19"] = "Select Block", -- \19 is Ctrl-S
-    ["t"] = "Terminal",
-    ["no"] = "Operator Pending",
-    ["niI"] = "Normal (Insert)",
-    ["niR"] = "Normal (Replace)",
-    ["niV"] = "Normal (Virtual Replace)",
-    ["nt"] = "Normal (Terminal)",
-    ["rm"] = "More Prompt",
-    ["r?"] = "Confirm",
-    ["!"] = "Shell",
+    ["n"] = { name = "Normal", hl = "StatuslineNormal" },
+    ["i"] = { name = "Insert", hl = "StatuslineInsert" },
+    ["v"] = { name = "Visual", hl = "StatuslineVisual" },
+    ["V"] = { name = "Visual Line", hl = "StatuslineVisual" },
+    ["\22"] = { name = "Visual Block", hl = "StatuslineVisual" }, -- \22 is Ctrl-V
+    ["c"] = { name = "Command", hl = "StatuslineCommand" },
+    ["R"] = { name = "Replace", hl = "StatuslineReplace" },
+    ["s"] = { name = "Select", hl = "StatuslineSelect" },
+    ["S"] = { name = "Select Line", hl = "StatuslineSelect" },
+    ["\19"] = { name = "Select Block", hl = "StatuslineSelect" }, -- \19 is Ctrl-S
+    ["t"] = { name = "Terminal", hl = "StatuslineTerminal" },
+    ["no"] = { name = "Operator Pending", hl = "StatuslineNormal" },
+    ["niI"] = { name = "Normal (Insert)", hl = "StatuslineNormal" },
+    ["niR"] = { name = "Normal (Replace)", hl = "StatuslineNormal" },
+    ["niV"] = { name = "Normal (Virtual Replace)", hl = "StatuslineNormal" },
+    ["nt"] = { name = "Normal (Terminal)", hl = "StatuslineNormal" },
+    ["rm"] = { name = "More Prompt", hl = "StatuslineNormal" },
+    ["r?"] = { name = "Confirm", hl = "StatuslineNormal" },
+    ["!"] = { name = "Shell", hl = "StatuslineNormal" },
   }
 
-  return mode_map[mode] or "Unknown"
+  local mode_info = mode_map[mode] or { name = "Unknown", hl = "StatuslineNormal" }
+  return "%#" .. mode_info.hl .. "#" .. " " .. mode_info.name .. " " .. "%#StatusLine#"
 end
 
-M.sections.space = " "
+M.components.space = " "
 
-M.sections.bracket = function(s)
+M.components.bracket = function(s)
   return "[" .. s .. "]"
 end
+
+local branch_icon = ""
 
 _G.statusline.git_status = function()
   if not vim.b.gitsigns_status or vim.b.gitsigns_status == "" then
     return ""
   else
-    return "[" .. vim.b.gitsigns_status .. "]"
+    return "%#StatusLineGitStatus#" .. branch_icon .. " " .. vim.b.gitsigns_status .. "%#StatusLine#"
   end
 end
 
 _G.statusline.git_head = function()
-  local branch_icon = ""
   if not vim.b.gitsigns_head or vim.b.gitsigns_head == "" then
     return ""
   else
-    return vim.b.gitsigns_head
+    local branch = vim.b.gitsigns_head
+    if #branch > 20 then
+      branch = string.sub(branch, 1, 20) .. "…"
+    end
+    return "%#StatusLineGitBranch#" .. branch_icon .. " " .. branch .. "%#StatusLine#"
   end
 end
 
-M.sections.git_head = "%{v:lua.statusline.git_head()}"
-M.sections.git_status = "%{v:lua.statusline.git_status()}"
-M.sections.mode = "[%{v:lua.statusline.mode()}]"
-M.sections.filetype_icon = "%{v:lua.statusline.filetype_icon()}"
-M.sections.filetype = "%y"
-M.sections.filename = "%r%h%w%q%F"
-M.sections.line = "%l"
-M.sections.column = "%c"
-M.sections.modified = "%m"
-M.sections.line_col = M.sections.line .. " :" .. M.sections.column
+M.components.git_head = "%{%v:lua.statusline.git_head()%}"
+M.components.git_status = "%{%v:lua.statusline.git_status()%}"
+M.components.mode = "%{%v:lua.statusline.mode()%}"
+M.components.filetype_icon = "%{v:lua.statusline.filetype_icon()}"
+M.components.filetype = "%y"
+M.components.filename = "%r%h%w%q%F"
+M.components.line = "%l"
+M.components.column = "%c"
+M.components.modified = "%m"
+M.components.line_col = M.components.line .. " :" .. M.components.column
 
 local default_sections = {
-  left = { M.sections.mode, M.sections.git_head, M.sections.git_status },
-  center = { M.sections.filename, M.sections.modified },
-  right = { M.sections.bracket(M.sections.line_col) .. M.sections.filetype },
+  left = { M.components.mode, M.components.git_head },
+  center = { M.components.filetype_icon, M.components.filename, M.components.modified },
+  right = { M.components.git_status, M.components.bracket(M.components.line_col) },
   delimiter = " ",
 }
 
@@ -84,12 +126,21 @@ local default_sections = {
 ---@field center table<string>
 ---@field right table<string>
 ---@field delimiter string
-
+---@field options table
 ---@param opts statusline.Config?
 M.setup = function(opts)
+  pcall(function()
+    require("mini.icons").setup()
+  end)
   opts = opts or default_sections
   if #opts == 0 then
     opts = default_sections
+  end
+  opts.options = opts.options or {}
+  for k, v in pairs(options) do
+    if opts.options[k] ~= nil then
+      options[k] = v
+    end
   end
   local left = table.concat(opts.left or {}, opts.delimiter)
   local center = table.concat(opts.center or {}, opts.delimiter)
@@ -97,5 +148,7 @@ M.setup = function(opts)
 
   vim.o.statusline = table.concat({ left, center, right }, "%=")
 end
+
+M.setup()
 
 return M
