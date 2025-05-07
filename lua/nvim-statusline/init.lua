@@ -103,10 +103,10 @@ M.components.bracket = function(s)
   return "[" .. s .. "]"
 end
 
-M.components.git_head = "%{%v:lua.require('statusline').internal.git_head()%}"
-M.components.git_status = "%{%v:lua.require('statusline').internal.git_status()%}"
-M.components.mode = "%{%v:lua.require('statusline').internal.mode()%}"
-M.components.filetype_icon = "%{v:lua.require('statusline').internal.filetype_icon()}"
+M.components.git_head = "%{%v:lua.require('nvim-statusline').internal.git_head()%}"
+M.components.git_status = "%{%v:lua.require('nvim-statusline').internal.git_status()%}"
+M.components.mode = "%{%v:lua.require('nvim-statusline').internal.mode()%}"
+M.components.filetype_icon = "%{v:lua.require('nvim-statusline').internal.filetype_icon()}"
 M.components.filetype = "%y"
 M.components.filename = "%r%h%w%q%F"
 M.components.line = "%l"
