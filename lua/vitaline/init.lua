@@ -5,7 +5,7 @@ M.icons_providers = { Mini = "mini", NvimWebDevicons = "nvim-web-devicons" }
 
 local options = {
   use_icons = true,
-  icons_provider = M.icons_providers.Mini,
+  icons_provider = M.icons_providers.NvimWebDevicons,
 }
 
 vim.cmd [[
